@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "PulseTrace",
+  "version": "0.1.0",
+  "description": "Track browser tab active time and in-page interaction for configured targets.",
+  "permissions": ["storage", "tabs", "idle"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "options_page": "src/options.html",
+  "action": {
+    "default_title": "PulseTrace"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "src/shared/constants.js",
+        "src/shared/matching.js",
+        "src/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

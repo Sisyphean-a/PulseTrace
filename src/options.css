@@ -1,0 +1,120 @@
+:root {
+  --bg: radial-gradient(circle at 20% 20%, #e9f5ff 0%, #f8fff4 45%, #fff 100%);
+  --panel: rgba(255, 255, 255, 0.86);
+  --line: #d7e7d7;
+  --ink: #16302d;
+  --accent: #0b7a5c;
+  --accent-strong: #065840;
+  --muted: #5d6f6b;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "IBM Plex Sans", "Noto Sans", "Segoe UI Variable", sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+.layout {
+  max-width: 860px;
+  margin: 24px auto;
+  padding: 0 16px 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.hero h1 {
+  margin: 0;
+  letter-spacing: 0.4px;
+}
+
+.hero p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.hint {
+  margin-top: 0;
+  color: var(--muted);
+}
+
+.rule-form,
+.settings-form {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 140px 1fr auto;
+}
+
+.settings-form {
+  grid-template-columns: repeat(2, minmax(120px, 1fr)) auto;
+}
+
+input,
+select,
+button {
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  font: inherit;
+}
+
+button {
+  background: linear-gradient(135deg, var(--accent), #12a077);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 140ms ease, filter 140ms ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+button.secondary {
+  background: var(--accent-strong);
+}
+
+.rule-list {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.rule-item {
+  display: grid;
+  grid-template-columns: 120px 1fr auto auto;
+  gap: 8px;
+}
+
+.status {
+  min-height: 20px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 760px) {
+  .rule-form,
+  .settings-form,
+  .rule-item {
+    grid-template-columns: 1fr;
+  }
+}

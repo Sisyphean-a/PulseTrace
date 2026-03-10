@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PulseTrace Options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <header class="hero">
+        <h1>PulseTrace</h1>
+        <p>Configure URL rules and telemetry timings.</p>
+      </header>
+
+      <section class="panel">
+        <h2>Tracking Rules</h2>
+        <p class="hint">
+          Supports domain wildcard (e.g. <code>*://*.github.com/*</code>) and
+          exact URL.
+        </p>
+
+        <form id="rule-form" class="rule-form">
+          <select id="rule-type" name="type">
+            <option value="domain">domain</option>
+            <option value="exact">exact</option>
+          </select>
+          <input
+            id="rule-pattern"
+            name="pattern"
+            placeholder="*://*.example.com/* or https://example.com/path"
+            required
+            type="text"
+          />
+          <button type="submit">Add Rule</button>
+        </form>
+
+        <ul id="rule-list" class="rule-list"></ul>
+      </section>
+
+      <section class="panel">
+        <h2>Settings</h2>
+        <form id="settings-form" class="settings-form">
+          <label>
+            Idle Threshold (seconds)
+            <input id="idle-threshold" min="15" required type="number" />
+          </label>
+          <label>
+            Heartbeat Interval (ms)
+            <input id="heartbeat-interval" min="1000" required type="number" />
+          </label>
+          <button type="submit">Save Settings</button>
+        </form>
+      </section>
+
+      <p id="status" class="status" aria-live="polite"></p>
+    </main>
+
+    <script src="shared/constants.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>
