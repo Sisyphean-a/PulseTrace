@@ -2,6 +2,7 @@
   const { LOG_PREFIX, STORAGE_KEYS } = self.PulseTraceConstants;
   const { buildOverviewModel } = self.PulseTraceOverviewAggregation;
   const { buildTopUrlDisplayGroups } = self.PulseTraceOverviewGrouping;
+  const { fetchLogSnapshot } = self.PulseTraceOverviewStorage;
   const { renderUrlTable } = self.PulseTraceOverviewUrlRenderer;
   const RELOAD_DEBOUNCE_MS = 250;
   const MAX_URL_ITEMS = 8;
@@ -62,7 +63,11 @@
   async function refreshOverview() {
     setRefreshState(true);
     try {
-      const storageSnapshot = await chrome.storage.local.get(null);
+      const storageSnapshot = await fetchLogSnapshot({
+        logPrefix: LOG_PREFIX,
+        storage: chrome.storage.local
+      });
+      const configSnapshot = await chrome.storage.local.get(STORAGE_KEYS.CONFIG);
       const model = buildOverviewModel({
         now: Date.now(),
         range: state.range,
@@ -70,7 +75,7 @@
       });
       const groupedUrls = buildTopUrlDisplayGroups({
         entries: model.topUrls,
-        trackingRules: getTrackingRules(storageSnapshot)
+        trackingRules: getTrackingRules(configSnapshot)
       });
       renderOverview({
         ...model,

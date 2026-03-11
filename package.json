@@ -4,7 +4,8 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "test": "vitest run --globals"
+    "test": "vitest run --globals --pool=threads --poolOptions.threads.singleThread",
+    "test:ci": "vitest run --globals --pool=threads --poolOptions.threads.singleThread"
   },
   "devDependencies": {
     "vitest": "^2.1.9"

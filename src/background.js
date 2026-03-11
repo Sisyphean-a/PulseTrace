@@ -12,15 +12,18 @@ const {
 const { isUrlTracked } = self.PulseTraceMatching;
 const { createTrackingEngine } = self.PulseTraceTrackingEngine;
 const {
-  appendMetricEvent,
-  appendSessionLog: appendSessionToStorage,
+  createLogStorageWriter,
   createDefaultConfig,
   createEmptyContext,
   normalizeConfig
 } = self.PulseTraceBackgroundUtils;
 const WINDOW_NONE_ID = chrome.windows.WINDOW_ID_NONE;
+const RUNTIME_STATE_FLUSH_MS = 2_000;
 let bootstrapPromise = null;
 let checkpointTimer = null;
+let runtimeFlushTimer = null;
+let runtimeStateDirty = false;
+let logWriter = null;
 let config = createDefaultConfig();
 let activeContext = createEmptyContext();
 let engine = createTrackingEngine({
@@ -115,13 +118,12 @@ chrome.runtime.onSuspend.addListener(() => {
     const now = Date.now();
     const result = engine.closeOpenSession({ now });
     if (result.completedSession) {
-      await appendSessionToStorage({
+      await logWriter.appendSessionLog({
         session: result.completedSession,
-        storage: chrome.storage.local,
         timestamp: now
       });
     }
-    await persistRuntimeState({ now });
+    await flushRuntimeState({ now, force: true });
   });
 });
 
@@ -139,6 +141,7 @@ function ensureBootstrapped() {
 
 async function bootstrap() {
   config = await loadConfig();
+  logWriter = createLogStorageWriter({ storage: chrome.storage.local });
   await restoreRuntimeState();
   applyIdleThreshold();
   startCheckpointTimer();
@@ -232,7 +235,7 @@ async function applyContextPatch(params) {
   const result = engine.applyContext({ ...nextContext, now });
   activeContext = nextContext;
   if (nextContext.activeUrl && nextContext.isTracked) {
-    await appendMetricEvent({
+    await logWriter.appendMetricEvent({
       eventKey: "metric1Events",
       payload: {
         systemActive:
@@ -242,18 +245,16 @@ async function applyContextPatch(params) {
         timestamp: now,
         title: nextContext.activeTitle,
         url: nextContext.activeUrl
-      },
-      storage: chrome.storage.local
+      }
     });
   }
   if (result.completedSession) {
-    await appendSessionToStorage({
+    await logWriter.appendSessionLog({
       session: result.completedSession,
-      storage: chrome.storage.local,
       timestamp: now
     });
   }
-  await persistRuntimeState({ now });
+  scheduleRuntimeStateFlush();
 }
 
 async function handleHeartbeatMessage(params) {
@@ -269,17 +270,16 @@ async function handleHeartbeatMessage(params) {
   if (!response.accepted) {
     return { ok: false, reason: "heartbeat-not-matched" };
   }
-  await appendMetricEvent({
+  await logWriter.appendMetricEvent({
     eventKey: "metric2Heartbeats",
     payload: {
       tabId: sender.tab?.id ?? null,
       timestamp: now,
       title: message.title || "",
       url: message.url || ""
-    },
-    storage: chrome.storage.local
+    }
   });
-  await persistRuntimeState({ now });
+  scheduleRuntimeStateFlush();
   return { ok: true };
 }
 
@@ -293,6 +293,29 @@ async function persistRuntimeState(params) {
   await chrome.storage.local.set({
     [STORAGE_KEYS.RUNTIME_STATE]: runtimeState
   });
+  runtimeStateDirty = false;
+}
+
+function scheduleRuntimeStateFlush() {
+  runtimeStateDirty = true;
+  if (runtimeFlushTimer) {
+    return;
+  }
+  runtimeFlushTimer = setTimeout(() => {
+    runtimeFlushTimer = null;
+    void flushRuntimeState({ now: Date.now(), force: false });
+  }, RUNTIME_STATE_FLUSH_MS);
+}
+
+async function flushRuntimeState(params) {
+  if (runtimeFlushTimer) {
+    clearTimeout(runtimeFlushTimer);
+    runtimeFlushTimer = null;
+  }
+  if (!runtimeStateDirty && !params.force) {
+    return;
+  }
+  await persistRuntimeState({ now: params.now });
 }
 
 function startCheckpointTimer() {
@@ -300,6 +323,6 @@ function startCheckpointTimer() {
     return;
   }
   checkpointTimer = setInterval(() => {
-    void persistRuntimeState({ now: Date.now() });
+    void flushRuntimeState({ now: Date.now(), force: false });
   }, CHECKPOINT_INTERVAL_MS);
 }
