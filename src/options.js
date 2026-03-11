@@ -36,7 +36,7 @@
     const type = elements.ruleType.value;
     const pattern = elements.rulePattern.value.trim();
     if (!pattern) {
-      showStatus("Rule pattern cannot be empty.");
+      showStatus("规则内容不能为空。");
       return;
     }
     const nextRule = {
@@ -51,7 +51,7 @@
     await persistConfig();
     elements.rulePattern.value = "";
     render();
-    showStatus("Rule added.");
+    showStatus("规则已新增。");
   }
 
   async function handleSaveSettings(event) {
@@ -64,7 +64,7 @@
       !Number.isInteger(heartbeatIntervalMs) ||
       heartbeatIntervalMs < MIN_HEARTBEAT_INTERVAL_MS;
     if (invalidValues) {
-      showStatus("Please enter valid numeric settings.");
+      showStatus("请输入合法的数字设置。");
       return;
     }
     config = {
@@ -72,7 +72,7 @@
       settings: { heartbeatIntervalMs, idleThresholdSeconds }
     };
     await persistConfig();
-    showStatus("Settings saved.");
+    showStatus("设置已保存。");
   }
 
   function createDefaultConfig() {
@@ -129,8 +129,8 @@
     const item = document.createElement("li");
     const typeInput = buildTypeInput(rule.type);
     const patternInput = buildPatternInput(rule.pattern);
-    const saveButton = buildButton("Save", "secondary");
-    const deleteButton = buildButton("Delete", "");
+    const saveButton = buildButton("保存", "secondary");
+    const deleteButton = buildButton("删除", "");
     item.className = "rule-item";
     saveButton.addEventListener("click", async () => {
       await updateRule({
@@ -148,10 +148,14 @@
 
   function buildTypeInput(currentValue) {
     const select = document.createElement("select");
+    const labelMap = {
+      domain: "域名通配",
+      exact: "精确匹配"
+    };
     ["domain", "exact"].forEach((type) => {
       const option = document.createElement("option");
       option.value = type;
-      option.textContent = type;
+      option.textContent = labelMap[type];
       option.selected = currentValue === type;
       select.appendChild(option);
     });
@@ -177,7 +181,7 @@
 
   async function updateRule(nextRule) {
     if (!nextRule.pattern) {
-      showStatus("Rule pattern cannot be empty.");
+      showStatus("规则内容不能为空。");
       return;
     }
     config = {
@@ -191,7 +195,7 @@
     };
     await persistConfig();
     renderRules();
-    showStatus("Rule updated.");
+    showStatus("规则已更新。");
   }
 
   async function deleteRule(ruleId) {
@@ -201,7 +205,7 @@
     };
     await persistConfig();
     renderRules();
-    showStatus("Rule deleted.");
+    showStatus("规则已删除。");
   }
 
   function showStatus(message) {

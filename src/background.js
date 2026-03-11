@@ -37,6 +37,12 @@ chrome.runtime.onStartup.addListener(() => {
   void ensureBootstrapped();
 });
 
+chrome.action.onClicked.addListener(() => {
+  void chrome.runtime.openOptionsPage().catch((error) => {
+    console.error("PulseTrace open options page failed:", error);
+  });
+});
+
 chrome.idle.onStateChanged.addListener((state) => {
   void withBootstrapped(async () => {
     const now = Date.now();

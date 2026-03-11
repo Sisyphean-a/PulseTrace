@@ -1,11 +1,13 @@
 :root {
-  --bg: radial-gradient(circle at 20% 20%, #e9f5ff 0%, #f8fff4 45%, #fff 100%);
-  --panel: rgba(255, 255, 255, 0.86);
-  --line: #d7e7d7;
-  --ink: #16302d;
-  --accent: #0b7a5c;
-  --accent-strong: #065840;
-  --muted: #5d6f6b;
+  --bg: radial-gradient(circle at 10% 0%, #e5f2ff 0%, #f2fff4 42%, #fff8ef 100%);
+  --panel: rgba(255, 255, 255, 0.9);
+  --line: #d3e1d9;
+  --ink: #122b24;
+  --muted: #577169;
+  --accent: #0a7a5c;
+  --accent-strong: #005a42;
+  --active-bar: #2f90e0;
+  --interactive-bar: #26b38b;
   --radius: 14px;
 }
 
@@ -16,22 +18,22 @@
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "IBM Plex Sans", "Noto Sans", "Segoe UI Variable", sans-serif;
+  font-family: "IBM Plex Sans", "Noto Sans SC", "Noto Sans", "Segoe UI Variable", sans-serif;
   color: var(--ink);
   background: var(--bg);
 }
 
 .layout {
-  max-width: 860px;
+  max-width: 1080px;
   margin: 24px auto;
-  padding: 0 16px 24px;
+  padding: 0 16px 28px;
   display: grid;
   gap: 16px;
 }
 
 .hero h1 {
   margin: 0;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
 }
 
 .hero p {
@@ -47,8 +49,15 @@ body {
   backdrop-filter: blur(4px);
 }
 
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
 .hint {
-  margin-top: 0;
+  margin: 4px 0 0;
   color: var(--muted);
 }
 
@@ -73,7 +82,7 @@ button {
 }
 
 button {
-  background: linear-gradient(135deg, var(--accent), #12a077);
+  background: linear-gradient(135deg, var(--accent), #0ea37a);
   border: none;
   color: #fff;
   font-weight: 600;
@@ -109,6 +118,12 @@ button.secondary {
   margin: 0;
   color: var(--muted);
   font-size: 0.95rem;
+}
+
+@media (max-width: 980px) {
+  .section-head {
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 760px) {

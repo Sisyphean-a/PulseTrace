@@ -1,55 +1,135 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PulseTrace Options</title>
+    <title>PulseTrace 设置</title>
     <link rel="stylesheet" href="options.css" />
+    <link rel="stylesheet" href="overview.css" />
   </head>
   <body>
     <main class="layout">
       <header class="hero">
         <h1>PulseTrace</h1>
-        <p>Configure URL rules and telemetry timings.</p>
+        <p>总览分析与追踪规则配置。</p>
       </header>
 
+      <section class="panel overview-panel">
+        <div class="section-head">
+          <div>
+            <h2>活动总览</h2>
+            <p class="hint">
+              数据保存于 <code>chrome.storage.local</code>。重启浏览器后通常会保留，
+              但清除扩展数据或卸载扩展后会丢失。
+            </p>
+          </div>
+          <div class="overview-actions">
+            <label>
+              时间范围
+              <select id="overview-range">
+                <option value="1d">今天</option>
+                <option value="7d" selected>最近 7 天</option>
+                <option value="30d">最近 30 天</option>
+                <option value="all">全部</option>
+              </select>
+            </label>
+            <button id="overview-refresh" class="secondary" type="button">
+              刷新
+            </button>
+          </div>
+        </div>
+
+        <div id="overview-empty" class="overview-empty" hidden>
+          暂无活动数据。请先添加追踪规则并访问被追踪页面。
+        </div>
+
+        <div id="overview-content" class="overview-content">
+          <section class="overview-stats">
+            <article class="stat-card">
+              <p>总活跃时长</p>
+              <strong id="stat-total-active">0分</strong>
+            </article>
+            <article class="stat-card">
+              <p>总交互时长</p>
+              <strong id="stat-total-interactive">0分</strong>
+            </article>
+            <article class="stat-card">
+              <p>会话数</p>
+              <strong id="stat-total-sessions">0</strong>
+            </article>
+            <article class="stat-card">
+              <p>追踪 URL 数</p>
+              <strong id="stat-tracked-urls">0</strong>
+            </article>
+            <article class="stat-card">
+              <p>交互率</p>
+              <strong id="stat-interaction-rate">0%</strong>
+            </article>
+          </section>
+
+          <section class="overview-grid">
+            <article class="chart-card">
+              <h3>每日趋势</h3>
+              <div id="daily-chart" class="metric-chart"></div>
+            </article>
+            <article class="chart-card">
+              <h3>高频 URL</h3>
+              <div id="url-chart" class="metric-chart"></div>
+            </article>
+          </section>
+
+          <article class="chart-card">
+            <h3>会话时间线（24 小时）</h3>
+            <div class="timeline-scale">
+              <span>00:00</span>
+              <span>06:00</span>
+              <span>12:00</span>
+              <span>18:00</span>
+              <span>24:00</span>
+            </div>
+            <div id="timeline-chart" class="timeline-chart"></div>
+          </article>
+        </div>
+
+        <p id="overview-updated" class="hint"></p>
+      </section>
+
       <section class="panel">
-        <h2>Tracking Rules</h2>
+        <h2>追踪规则</h2>
         <p class="hint">
-          Supports domain wildcard (e.g. <code>*://*.github.com/*</code>) and
-          exact URL.
+          支持域名通配（如 <code>*://*.github.com/*</code>）和精确 URL。
         </p>
 
         <form id="rule-form" class="rule-form">
           <select id="rule-type" name="type">
-            <option value="domain">domain</option>
-            <option value="exact">exact</option>
+            <option value="domain">域名通配</option>
+            <option value="exact">精确匹配</option>
           </select>
           <input
             id="rule-pattern"
             name="pattern"
-            placeholder="*://*.example.com/* or https://example.com/path"
+            placeholder="*://*.example.com/* 或 https://example.com/path"
             required
             type="text"
           />
-          <button type="submit">Add Rule</button>
+          <button type="submit">新增规则</button>
         </form>
 
         <ul id="rule-list" class="rule-list"></ul>
       </section>
 
       <section class="panel">
-        <h2>Settings</h2>
+        <h2>设置</h2>
         <form id="settings-form" class="settings-form">
           <label>
-            Idle Threshold (seconds)
+            空闲阈值（秒）
             <input id="idle-threshold" min="15" required type="number" />
           </label>
           <label>
-            Heartbeat Interval (ms)
+            心跳间隔（毫秒）
             <input id="heartbeat-interval" min="1000" required type="number" />
           </label>
-          <button type="submit">Save Settings</button>
+          <button type="submit">保存设置</button>
         </form>
       </section>
 
@@ -57,6 +137,9 @@
     </main>
 
     <script src="shared/constants.js"></script>
+    <script src="shared/overview-timeline.js"></script>
+    <script src="shared/overview-aggregation.js"></script>
+    <script src="overview.js"></script>
     <script src="options.js"></script>
   </body>
 </html>
