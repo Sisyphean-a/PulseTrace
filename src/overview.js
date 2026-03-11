@@ -1,11 +1,11 @@
 (function initOverviewPage() {
-  const { LOG_PREFIX } = self.PulseTraceConstants;
+  const { LOG_PREFIX, STORAGE_KEYS } = self.PulseTraceConstants;
   const { buildOverviewModel } = self.PulseTraceOverviewAggregation;
+  const { buildTopUrlDisplayGroups } = self.PulseTraceOverviewGrouping;
+  const { renderUrlTable } = self.PulseTraceOverviewUrlRenderer;
   const RELOAD_DEBOUNCE_MS = 250;
   const MAX_URL_ITEMS = 8;
-  const state = {
-    range: "7d"
-  };
+  const state = { range: "7d" };
   const elements = captureElements();
   let reloadTimer = null;
   if (!elements.root) {
@@ -68,7 +68,14 @@
         range: state.range,
         storageSnapshot
       });
-      renderOverview(model);
+      const groupedUrls = buildTopUrlDisplayGroups({
+        entries: model.topUrls,
+        trackingRules: getTrackingRules(storageSnapshot)
+      });
+      renderOverview({
+        ...model,
+        displayTopUrls: groupedUrls
+      });
     } catch (error) {
       console.error("PulseTrace overview render failed:", error);
       renderError(error);
@@ -97,7 +104,7 @@
     }
     renderSummary(model.summary);
     renderDailyChart(model.daily);
-    renderUrlChart(model.topUrls);
+    renderUrlChart(model.displayTopUrls || []);
     renderTimeline(model.timeline);
     elements.updated.textContent = "更新时间：" + formatDateTime(Date.now());
   }
@@ -154,23 +161,18 @@
       ...selected.map((item) => Math.max(item.systemActiveMs, item.interactiveMs))
     );
     elements.urlChart.textContent = "";
-    selected.forEach((item) => {
-      const row = document.createElement("div");
-      row.className = "metric-row";
-      const label = document.createElement("span");
-      label.className = "metric-label";
-      label.textContent = formatUrlLabel(item.url);
-      label.title = item.url;
-      const bars = createDualBars({
-        maxValue,
-        primaryMs: item.systemActiveMs,
-        secondaryMs: item.interactiveMs
-      });
-      const value = document.createElement("span");
-      value.className = "metric-value";
-      value.textContent = formatDuration(item.systemActiveMs);
-      row.append(label, bars, value);
-      elements.urlChart.appendChild(row);
+    if (selected.length === 0) {
+      elements.urlChart.textContent = "暂无 URL 统计数据。";
+      return;
+    }
+    renderUrlTable({
+      computeRatio,
+      container: elements.urlChart,
+      formatDuration,
+      formatPercent,
+      formatUrlLabel,
+      maxValue,
+      rows: selected
     });
   }
   function createDualBars(params) {
@@ -268,6 +270,12 @@
     return Math.min(100, Math.round(value * 100)) + "%";
   }
   function formatUrlLabel(url) {
+    if (typeof url !== "string") {
+      return "";
+    }
+    if (!/^https?:\/\//i.test(url)) {
+      return url;
+    }
     try {
       const parsed = new URL(url);
       return parsed.host + parsed.pathname;
@@ -281,5 +289,12 @@
       return 0;
     }
     return numerator / denominator;
+  }
+  function getTrackingRules(storageSnapshot) {
+    const config = storageSnapshot?.[STORAGE_KEYS.CONFIG];
+    if (!config || !Array.isArray(config.trackingRules)) {
+      return [];
+    }
+    return config.trackingRules;
   }
 })();

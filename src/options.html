@@ -99,6 +99,11 @@
         <p class="hint">
           支持域名通配（如 <code>*://*.github.com/*</code>）和精确 URL。
         </p>
+        <p class="hint">
+          通配示例：<code>*.noahgroup.*</code> 可以匹配
+          <code>http://teambition.i.noahgroup.com/</code>。推荐写法：
+          <code>*://*.noahgroup.*/*</code>，语义更清晰。
+        </p>
 
         <form id="rule-form" class="rule-form">
           <select id="rule-type" name="type">
@@ -137,8 +142,10 @@
     </main>
 
     <script src="shared/constants.js"></script>
+    <script src="shared/overview-grouping.js"></script>
     <script src="shared/overview-timeline.js"></script>
     <script src="shared/overview-aggregation.js"></script>
+    <script src="shared/overview-url-renderer.js"></script>
     <script src="overview.js"></script>
     <script src="options.js"></script>
   </body>
