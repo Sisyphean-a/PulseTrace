@@ -1,15 +1,27 @@
 .overview-actions {
   display: grid;
-  grid-template-columns: minmax(140px, 1fr) auto;
+  grid-template-columns: minmax(170px, 220px) auto;
   gap: 8px;
-  min-width: 260px;
+  align-items: end;
+  min-width: 0;
 }
 
 .overview-actions label {
   display: grid;
-  gap: 6px;
-  font-size: 0.92rem;
+  gap: 4px;
+  font-size: 0.84rem;
+  font-weight: 600;
   color: var(--muted);
+}
+
+.overview-actions select {
+  min-height: 44px;
+}
+
+.overview-actions .secondary {
+  min-height: 44px;
+  padding: 0 14px;
+  white-space: nowrap;
 }
 
 .overview-empty {
@@ -268,5 +280,9 @@
 
   .overview-actions {
     grid-template-columns: 1fr;
+  }
+
+  .overview-actions .secondary {
+    width: 100%;
   }
 }
